@@ -13,7 +13,7 @@ ScrollableCalendarKit is a scrollable calendar view similar to one used in Apple
 #### Via Swift Package Manager
 
 - Go to File > Add Package Dependencies...
-- Paste https://github.com/alpaycli/ButtonStyles.git
+- Paste https://github.com/alpaycli/ScrollableCalendarKit.git
 - Select the version and add the package to your project.
 
 ## Usage
