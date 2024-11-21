@@ -19,9 +19,6 @@ struct HorizontalScrollView: View {
     
     @State var isInteracting = false
     
-    @State private var pullStateHistory: [PullState] = []
-    
-    
     private var leadingPullState: PullState {
         guard let index = days.firstIndex(where:  { $0.id == scrollId }) else { return .idle}
         
@@ -59,30 +56,22 @@ struct HorizontalScrollView: View {
                 .overlay(alignment: .leading) {
                     PullIndicator(title: String(selectedDay.date.year - 1), alignment: .leading, state: leadingPullState)
                         .onChange(of: leadingPullState) { old, new in
-                            pullStateHistory.append(contentsOf: [old, new])
-                            if pullStateHistory.suffix(4) == [.action, .triggered, .triggered, .idle] {
+                            if old == .action, new == .triggered, !isInteracting {
                                 withAnimation {
                                     days = selectedDay.date.addingDayInterval(-365).fetchYear()
                                     scrollId = days[days.count - 4].id
                                 }
-                            }
-                            if pullStateHistory.count >= 6 {
-                                pullStateHistory.removeFirst(2)
                             }
                         }
                 }
                 .overlay(alignment: .trailing) {
                     PullIndicator(title: String(selectedDay.date.year + 1), alignment: .trailing, state: trailingPullState)
                         .onChange(of: trailingPullState) { old, new in
-                            pullStateHistory.append(contentsOf: [old, new])
-                            if pullStateHistory.suffix(4) == [.action, .triggered, .triggered, .idle] {
+                            if old == .action, new == .triggered, !isInteracting {
                                 withAnimation {
                                     days = selectedDay.date.addingDayInterval(365).fetchYear()
                                     scrollId = days[3].id
                                 }
-                            }
-                            if pullStateHistory.count >= 6 {
-                                pullStateHistory.removeFirst(2)
                             }
                         }
                 }
@@ -94,6 +83,9 @@ struct HorizontalScrollView: View {
             .scrollTargetBehavior(.viewAligned)
             .scrollIndicators(.hidden)
             .scrollPosition(id: $scrollId, anchor: .center)
+            .onScrollPhaseChange({ oldPhase, newPhase in
+                isInteracting = newPhase == .interacting
+            })
             .onChange(of: selectedDay) { oldValue, newValue in
                 guard isManualScrollNeeded else { return }
                 proxy.scrollTo(selectedDay.id, anchor: .center)
