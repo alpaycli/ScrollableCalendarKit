@@ -2,7 +2,7 @@
 
 ScrollableCalendarKit is a scrollable calendar view similar to one used in Apple Health App's Medications section.
 
-![](https://github.com/alpaycli/ButtonStyles/blob/main/Preview.gif)
+![](https://github.com/alpaycli/ScrollableCalendarKit/blob/main/Preview.gif)
 
 ## Installation
 
