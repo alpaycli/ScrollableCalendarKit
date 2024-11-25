@@ -10,10 +10,9 @@ import SwiftUI
 struct HorizontalScrollView: View {
     @Binding var days: [Date.WeekDay]
     @Binding var selectedDay: Date.WeekDay
+    @Binding var isManualScrollNeeded: Bool
     
     @State private var scrollId: UUID?
-    
-    @Binding var isManualScrollNeeded: Bool
     
     @State private var firstAppear = true
     
@@ -47,7 +46,6 @@ struct HorizontalScrollView: View {
                 LazyHStack(spacing: 10) {
                     ForEach(days) { day in
                         DayView(day: day, currentDate: selectedDay.date)
-//                            .id(day.id)
                             .containerRelativeFrame(.horizontal, count: 7, spacing: 10)
                             .onTapGesture {
                                 handleDayTap(day, proxy: proxy)
@@ -56,28 +54,10 @@ struct HorizontalScrollView: View {
                 }
                 .scrollTargetLayout()
                 .overlay(alignment: .leading) {
-                    PullIndicator(title: String(selectedDay.date.year - 1), alignment: .leading, state: leadingPullState)
-                        .onChange(of: leadingPullState) { old, new in
-                            if old == .action, new == .triggered, !isInteracting {
-                                withAnimation {
-                                    days = selectedDay.date.addingDayInterval(-365).fetchYear()
-                                    scrollId = days[days.count - 4].id
-                                    yearChanged = true
-                                }
-                            }
-                        }
+                    leadingPullIndicator
                 }
                 .overlay(alignment: .trailing) {
-                    PullIndicator(title: String(selectedDay.date.year + 1), alignment: .trailing, state: trailingPullState)
-                        .onChange(of: trailingPullState) { old, new in
-                            if old == .action, new == .triggered, !isInteracting {
-                                withAnimation {
-                                    days = selectedDay.date.addingDayInterval(365).fetchYear()
-                                    scrollId = days[3].id
-                                    yearChanged = true
-                                }
-                            }
-                        }
+                    trailingScrollIndicator
                 }
             }
             .contentMargins(10, for: .scrollContent)
@@ -125,5 +105,35 @@ struct HorizontalScrollView: View {
         withAnimation {
             proxy.scrollTo(selectedDay.id, anchor: .center)
         }
+    }
+}
+
+// MARK: - View compoents
+
+extension HorizontalScrollView {
+    private var leadingPullIndicator: some View {
+        PullIndicator(title: String(selectedDay.date.year - 1), alignment: .leading, state: leadingPullState)
+            .onChange(of: leadingPullState) { old, new in
+                if old == .action, new == .triggered, !isInteracting {
+                    withAnimation {
+                        days = selectedDay.date.addingDayInterval(-365).fetchYear()
+                        scrollId = days[days.count - 4].id
+                        yearChanged = true
+                    }
+                }
+            }
+    }
+    
+    private var trailingScrollIndicator: some View {
+        PullIndicator(title: String(selectedDay.date.year + 1), alignment: .trailing, state: trailingPullState)
+            .onChange(of: trailingPullState) { old, new in
+                if old == .action, new == .triggered, !isInteracting {
+                    withAnimation {
+                        days = selectedDay.date.addingDayInterval(365).fetchYear()
+                        scrollId = days[3].id
+                        yearChanged = true
+                    }
+                }
+            }
     }
 }
