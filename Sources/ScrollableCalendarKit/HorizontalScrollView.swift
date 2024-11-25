@@ -17,7 +17,9 @@ struct HorizontalScrollView: View {
     
     @State private var firstAppear = true
     
-    @State var isInteracting = false
+    @State private var isInteracting = false
+    
+    @State private var yearChanged = false
     
     private var leadingPullState: PullState {
         guard let index = days.firstIndex(where:  { $0.id == scrollId }) else { return .idle}
@@ -60,6 +62,7 @@ struct HorizontalScrollView: View {
                                 withAnimation {
                                     days = selectedDay.date.addingDayInterval(-365).fetchYear()
                                     scrollId = days[days.count - 4].id
+                                    yearChanged = true
                                 }
                             }
                         }
@@ -71,6 +74,7 @@ struct HorizontalScrollView: View {
                                 withAnimation {
                                     days = selectedDay.date.addingDayInterval(365).fetchYear()
                                     scrollId = days[3].id
+                                    yearChanged = true
                                 }
                             }
                         }
@@ -79,7 +83,7 @@ struct HorizontalScrollView: View {
             .contentMargins(10, for: .scrollContent)
             .sensoryFeedback(.selection, trigger: leadingPullState)
             .sensoryFeedback(.selection, trigger: trailingPullState)
-            .sensoryFeedback(.success, trigger: days)
+            .sensoryFeedback(.success, trigger: yearChanged)
             .scrollTargetBehavior(.viewAligned)
             .scrollIndicators(.hidden)
             .scrollPosition(id: $scrollId, anchor: .center)
